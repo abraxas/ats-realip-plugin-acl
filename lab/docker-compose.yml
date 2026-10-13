@@ -1,0 +1,106 @@
+name: ats-realip-plugin-acl
+
+services:
+  origin:
+    image: python:3.13-slim
+    pull_policy: missing
+    init: true
+    restart: "no"
+    ports:
+      - "127.0.0.1:18771:8080"
+    volumes:
+      - ./origin.py:/lab/origin.py:ro
+    environment:
+      PYTHONUNBUFFERED: "1"
+      WITNESS: "ATS-REALIP-PLUGIN-ACL-WITNESS"
+      ORIGIN_HOST: "0.0.0.0"
+      ORIGIN_PORT: "8080"
+    working_dir: /lab
+    command: ["python3", "/lab/origin.py"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python3",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/secret/', timeout=2)",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+      start_period: 2s
+    networks:
+      labnet:
+        ipv4_address: 172.30.70.20
+
+  ats:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        RECORDS_FILE: records-plugin.yaml
+    image: ats-realip-plugin-acl:local
+    pull_policy: never
+    init: true
+    restart: "no"
+    depends_on:
+      origin:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:18770:8080"
+    networks:
+      labnet:
+        ipv4_address: 172.30.70.10
+
+  ats-control:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        RECORDS_FILE: records-peer.yaml
+    image: ats-realip-plugin-acl-control:local
+    pull_policy: never
+    init: true
+    restart: "no"
+    depends_on:
+      origin:
+        condition: service_healthy
+    networks:
+      labnet:
+        ipv4_address: 172.30.70.11
+
+  trusted:
+    image: python:3.13-slim
+    pull_policy: missing
+    init: true
+    restart: "no"
+    volumes:
+      - ./sidecar_http.py:/lab/sidecar_http.py:ro
+    working_dir: /lab
+    command: ["sleep", "infinity"]
+    networks:
+      labnet:
+        ipv4_address: 172.30.70.30
+
+  attacker:
+    image: python:3.13-slim
+    pull_policy: missing
+    init: true
+    restart: "no"
+    depends_on:
+      - ats
+      - ats-control
+    volumes:
+      - ./sidecar_http.py:/lab/sidecar_http.py:ro
+    working_dir: /lab
+    command: ["sleep", "infinity"]
+    networks:
+      labnet:
+        ipv4_address: 172.30.70.99
+
+networks:
+  labnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.70.0/24

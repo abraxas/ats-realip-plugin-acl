@@ -1,0 +1,4 @@
+simple:
+  header: "Client-IP"
+  trustedAddress:
+    - "172.30.70.30"

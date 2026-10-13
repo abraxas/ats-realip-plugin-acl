@@ -1,0 +1,42 @@
+records:
+  diags:
+    debug:
+      enabled: 1
+      tags: ip_allow|http|url_rewrite|realip
+    output:
+      diag: S
+      debug: S
+      status: S
+      note: S
+      warning: S
+      error: S
+  exec_thread:
+    autoconfig:
+      enabled: 0
+    limit: 2
+  http:
+    server_ports: "8080"
+    cache:
+      http: 0
+    push_method_enabled: 0
+    connect_ports: "443 8080"
+  reverse_proxy:
+    enabled: 1
+  url_remap:
+    remap_required: 1
+    acl_behavior_policy: 0
+    pristine_host_hdr: 0
+  acl:
+    subjects: PEER
+  cache:
+    ram_cache:
+      size: 33554432
+  log:
+    logging_enabled: 3
+    max_space_mb_for_logs: 20
+    max_space_mb_headroom: 2
+  net:
+    connections_throttle: 1000
+    max_connections_in: 1000
+  task_threads: 2
+  accept_threads: 1

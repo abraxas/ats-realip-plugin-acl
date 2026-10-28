@@ -13,6 +13,10 @@
   &nbsp;·&nbsp;
   <a href="https://github.com/abraxas/ats-realip-plugin-acl">ats-realip-plugin-acl</a>
 </p>
+<p align="center">
+  Write-up: <a href="https://abraxaslabs.tech/research/ats-realip-plugin-acl"><strong>https://abraxaslabs.tech/research/ats-realip-plugin-acl</strong></a>
+</p>
+
 
 # ats-realip-plugin-acl
 
